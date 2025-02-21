@@ -1,7 +1,7 @@
 {
   lib,
   stdenv,
-  mkMesonLibrary,
+  mkZigLibrary,
 
   boost,
   brotli,
@@ -19,7 +19,7 @@ let
   inherit (lib) fileset;
 in
 
-mkMesonLibrary (finalAttrs: {
+mkZigLibrary (finalAttrs: {
   pname = "zix-util";
   inherit version nixVersion;
 
@@ -32,11 +32,6 @@ mkMesonLibrary (finalAttrs: {
     ../../.zix-version
     ./.zix-version
     ./widecharwidth
-    ./meson.build
-    ./meson.options
-    ./linux/meson.build
-    ./unix/meson.build
-    ./windows/meson.build
     (fileset.fileFilter (file: file.hasExt "cc") ./.)
     (fileset.fileFilter (file: file.hasExt "hh") ./.)
     (fileset.fileFilter (file: file.hasExt "zig") ./.)
@@ -53,16 +48,10 @@ mkMesonLibrary (finalAttrs: {
     nlohmann_json
   ];
 
-  mesonFlags = [
-    (lib.mesonBool "cpuid" (stdenv.hostPlatform.isx86_64 || stdenv.hostPlatform.isAarch64))
-  ];
-
-  env = {
-    # Needed for Meson to find Boost.
-    # https://github.com/NixOS/nixpkgs/issues/86131.
-    BOOST_INCLUDEDIR = "${lib.getDev boost}/include";
-    BOOST_LIBRARYDIR = "${lib.getLib boost}/lib";
-  };
+  postInstall = ''
+    substituteInPlace $out/lib/pkgconfig/nix-util.pc \
+      --replace-fail "includedir=$out" "includedir=$dev"
+  '';
 
   meta = {
     platforms = lib.platforms.unix ++ lib.platforms.windows;
