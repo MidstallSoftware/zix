@@ -184,6 +184,28 @@ let
     outputs = prevAttrs.outputs or [ "out" ] ++ [ "dev" ];
   };
 
+  zigLayer = finalAttrs: prevAttrs: {
+    nativeBuildInputs = [
+      zig_0_14
+      zig_0_14.hook
+    ];
+  };
+
+  zigBuildLayer = finalAttrs: prevAttrs: {
+    nativeBuildInputs = prevAttrs.nativeBuildInputs or [ ] ++ [
+      pkg-config
+    ];
+    separateDebugInfo = !stdenv.hostPlatform.isStatic;
+    hardeningDisable = lib.optional stdenv.hostPlatform.isStatic "pie";
+    zigBuildFlags = prevAttrs.zigBuildFlags or [ ] ++ [
+      "-Dlinkage=${if stdenv.hostPlatform.isStatic then "static" else "dynamic"}"
+    ];
+  };
+
+  zigLibraryLayer = finalAttrs: prevAttrs: {
+    outputs = prevAttrs.outputs or [ "out" ] ++ [ "dev" ];
+  };
+
   # Work around weird `--as-needed` linker behavior with BSD, see
   # https://github.com/mesonbuild/meson/issues/3593
   bsdNoLinkAsNeeded =
@@ -223,6 +245,8 @@ in
   */
   mesonComponentOverrides = finalAttrs: prevAttrs: { };
 
+  zigComponentOverrides = finalAttrs: prevAttrs: { };
+
   /**
     An overridable derivation layer for handling the sources.
   */
@@ -242,6 +266,17 @@ in
     scope.overrideScope (
       finalScope: prevScope: {
         mesonComponentOverrides = lib.composeExtensions scope.mesonComponentOverrides f;
+      }
+    );
+
+  /**
+    Apply an extension function (i.e. overlay-shaped) to all component derivations.
+  */
+  overrideAllZigComponents =
+    f:
+    scope.overrideScope (
+      finalScope: prevScope: {
+        zigComponentOverrides = lib.composeExtensions scope.zigComponentOverrides f;
       }
     );
 
@@ -318,6 +353,33 @@ in
     mesonBuildLayer
     mesonLibraryLayer
     scope.mesonComponentOverrides
+  ];
+
+  mkZigDerivation = mkPackageBuilder [
+    miscGoodPractice
+    scope.sourceLayer
+    setVersionLayer
+    zigLayer
+    scope.zigComponentOverrides
+  ];
+  mkZigExecutable = mkPackageBuilder [
+    miscGoodPractice
+    bsdNoLinkAsNeeded
+    scope.sourceLayer
+    setVersionLayer
+    zigLayer
+    zigBuildLayer
+    scope.zigComponentOverrides
+  ];
+  mkZigLibrary = mkPackageBuilder [
+    miscGoodPractice
+    bsdNoLinkAsNeeded
+    scope.sourceLayer
+    zigLayer
+    setVersionLayer
+    zigBuildLayer
+    zigLibraryLayer
+    scope.zigComponentOverrides
   ];
 
   nix-util = callPackage ../src/libutil/package.nix { };

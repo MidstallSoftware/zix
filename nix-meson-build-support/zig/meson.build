@@ -9,18 +9,33 @@ endif
 
 zig_target += '-' + get_option('abi')
 
-zig_args = [
+zig_base_args = [
   '--cache-dir', meson.current_build_dir() / 'zig-cache',
   '--global-cache-dir', meson.project_build_root() / 'zig-cache',
-  '-target', zig_target,
 ]
 
 if get_option('debug') or get_option('optimization') == 'plain'
-  zig_args += ['-O', 'Debug']
+  zig_optimize = 'Debug'
 elif get_option('optimization') == '2'
-  zig_args += ['-O', 'ReleaseFast']
+  zig_optimize = 'ReleaseFast'
 elif get_option('optimization') == '3'
-  zig_args += ['-O', 'ReleaseSafe']
+  zig_optimize = 'ReleaseSafe'
 elif get_option('optimization') == 's'
-  zig_args += ['-O', 'ReleaseSmall']
+  zig_optimize = 'ReleaseSmall'
+endif
+
+zig_args = zig_base_args + [
+  '-target', zig_target,
+  '-O', zig_optimize
+]
+
+zig_build_args = zig_base_args + [
+  '-Dtarget=' + zig_target,
+  '-Doptimize=' + zig_optimize,
+]
+
+if get_option('default_library') == 'shared'
+  zig_build_args += ['-Dlinkage=dynamic']
+elif get_option('default_library') == 'static'
+  zig_build_args += ['-Dlinkage=static']
 endif
