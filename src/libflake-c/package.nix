@@ -29,7 +29,7 @@ mkMesonLibrary (finalAttrs: {
     ../../.zix-version
     ./.zix-version
     ./meson.build
-    # ./meson.options
+    ./meson.options
     (fileset.fileFilter (file: file.hasExt "cc") ./.)
     (fileset.fileFilter (file: file.hasExt "hh") ./.)
     (fileset.fileFilter (file: file.hasExt "h") ./.)

@@ -3,3 +3,9 @@
 option('cpuid', type : 'boolean',
   description : 'determine microarchitecture levels with libcpuid (only relevant on x86_64)',
 )
+
+option('abi', type : 'combo',
+  choices: ['none', 'gnu', 'musl'],
+  value: 'gnu',
+  description: 'The ABI to pass to zig',
+)

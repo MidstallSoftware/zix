@@ -4,3 +4,9 @@
 option('profile-dir', type : 'string', value : 'etc/profile.d',
   description : 'the path to install shell profile files',
 )
+
+option('abi', type : 'combo',
+  choices: ['none', 'gnu', 'musl'],
+  value: 'gnu',
+  description: 'The ABI to pass to zig',
+)

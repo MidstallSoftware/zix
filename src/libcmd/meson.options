@@ -5,3 +5,9 @@ option(
   type: 'feature',
   description: 'Enable Markdown rendering in the Nix binary (requires lowdown)',
 )
+
+option('abi', type : 'combo',
+  choices: ['none', 'gnu', 'musl'],
+  value: 'gnu',
+  description: 'The ABI to pass to zig',
+)

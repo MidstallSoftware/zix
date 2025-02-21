@@ -25,3 +25,9 @@ option(
   type : 'string',
   value : '/usr',
   description : 'path to perl::dbd-SQLite')
+
+option('abi', type : 'combo',
+  choices: ['none', 'gnu', 'musl'],
+  value: 'gnu',
+  description: 'The ABI to pass to zig',
+)

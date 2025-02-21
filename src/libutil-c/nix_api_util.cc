@@ -1,5 +1,6 @@
 #include "nix_api_util.h"
 #include "config-global.hh"
+#include "config-util.h"
 #include "error.hh"
 #include "nix_api_util_internal.h"
 #include "util.hh"

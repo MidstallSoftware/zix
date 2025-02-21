@@ -1,3 +1,9 @@
 option('gc', type : 'feature',
   description : 'enable garbage collection in the Nix expression evaluator (requires Boehm GC)',
 )
+
+option('abi', type : 'combo',
+  choices: ['none', 'gnu', 'musl'],
+  value: 'gnu',
+  description: 'The ABI to pass to zig',
+)
